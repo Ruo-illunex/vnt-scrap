@@ -1,14 +1,9 @@
-# Path: src/ocr_model.py
-import re
-import requests
-from io import BytesIO
-
 import numpy as np
-from PIL import Image
 from huggingface_hub import from_pretrained_keras
 import tensorflow as tf
 import keras
 from keras import layers
+
 
 # 이미지 크기
 img_height = 50
@@ -16,12 +11,12 @@ img_width = 200
 max_length = 6
 characters = "0123456789"
 
-# Mapping characters to integers
+# 문자를 숫자로 변환하는 레이어를 만듭니다
 char_to_num = layers.StringLookup(
     vocabulary=list(characters), mask_token=None
 )
 
-# Mapping integers back to original characters
+# 한 번에 하나의 문자를 예측하는 모델을 만듭니다
 num_to_char = layers.StringLookup(
     vocabulary=char_to_num.get_vocabulary(), mask_token=None, invert=True
 )
@@ -45,14 +40,14 @@ def encode_single_sample(img):
     return img
 
 
-# A utility function to decode the output of the network
+# 모델의 입력과 출력을 정의합니다
 def decode_batch_predictions(pred):
     input_len = np.ones(pred.shape[0]) * pred.shape[1]
-    # Use greedy search. For complex tasks, you can use beam search
+    # CTC 디코딩
     results = keras.backend.ctc_decode(pred, input_length=input_len, greedy=True)[0][0][
         :, :max_length
     ]
-    # Iterate over the results and get back the text
+    # 결과를 정수에서 문자열로 변환
     output_text = []
     for res in results:
         res = tf.strings.reduce_join(num_to_char(res)).numpy().decode("utf-8")
@@ -81,28 +76,3 @@ prediction_model = keras.models.Model(
     inputs=model.get_layer(name="image").input,
     outputs=model.get_layer(name="dense2").output
 )
-
-# 이미지 URL
-url = 'https://www.smes.go.kr/venturein/pbntc/captchaImg.do'
-
-# requests를 사용하여 이미지를 가져옵니다
-response = requests.get(url)
-
-# 이미지가 정상적으로 다운로드 되었는지 확인
-if response.status_code == 200:
-    # BytesIO를 사용하여 이미지 데이터를 메모리에 로드합니다
-    image = Image.open(BytesIO(response.content))
-
-    # 이미지를 파일로 저장합니다
-    image_path = '../captcha_img/captcha.png'
-    image.save(image_path)
-
-    # 저장한 이미지를 다시 불러옵니다
-    saved_image = Image.open(image_path)
-
-    # 모델 예측
-    pred_texts = process_and_predict(saved_image)
-    print(f'OCR 결과 : {pred_texts}')
-
-else:
-    print("이미지를 다운로드할 수 없습니다.")

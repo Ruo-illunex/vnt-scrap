@@ -60,3 +60,10 @@ vnt-scrap
   - settings.py: 프로젝트 설정 관련 스크립트입니다.
   - utils.py: 일반적인 유틸리티 함수를 포함하는 스크립트입니다.
 - poetry.lock 및 pyproject.toml: 의존성 관리 및 프로젝트 설정을 위한 파일입니다.
+
+### 2023-11-13
+- cv2를 사용하여 captcha이미지를 좀더 선명하게 전처리하여 pytesseract로 OCR 테스트
+  - OCR 성능향상에 도움이 안됨
+  - ![image](https://github.com/Ruo-illunex/vnt-scrap/assets/149987874/222ec7c4-a2cd-4cb6-8148-58154a89b81d)
+  - ![image](https://github.com/Ruo-illunex/vnt-scrap/assets/149987874/5513e61e-413d-45bb-aba5-9281b2048c7e)
+  - pytesseract ocr 예측 결과: 28102

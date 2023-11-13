@@ -28,8 +28,10 @@ if response.status_code == 200:
     image_path = f'results/result-pytesseract/{folder_name}/captcha_img_{folder_name}.png'
     image.save(image_path)
 
-    # 저장한 이미지를 다시 불러옵니다
-    saved_image = Image.open(image_path)
+    utils.preprocess_image(image_path, folder_name) # 이미지 전처리
+
+    # 전처리된 이미지를 다시 불러옵니다
+    preprocessed_image = Image.open(f'results/result-pytesseract/{folder_name}/preprocessed_image.png')
 
     # OCR Engine Mode(–oem)과 Page Segmentation Mode(–psm)을 설정합니다
     # --psm N
@@ -59,7 +61,7 @@ if response.status_code == 200:
     config = ('--oem 3 --psm 6')
 
     # pytesseract를 사용하여 저장된 이미지에서 텍스트를 추출합니다
-    text = pytesseract.image_to_string(saved_image, config=config)
+    text = pytesseract.image_to_string(preprocessed_image, config=config)
     print(f'OCR 결과 : {text}')
     print(f'Length: {len(text)}')
 
